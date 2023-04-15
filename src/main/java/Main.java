@@ -11,6 +11,8 @@ public class Main {
     private static final String PRODUCTS_URL = "https://fakestoreapi.com/products";
     private static final String CARTS_URL = "https://fakestoreapi.com/carts";
 
+    private static final double EARTH_RADIUS = 6371.0; // kilometers
+
     public static void main(String[] args) throws Exception {
 
         // first assignment -> Retrieves user, product and shopping cart data #1
@@ -71,8 +73,7 @@ public class Main {
 
         JSONArray carts = new JSONArray(cartData);
 
-        double cartProductValue = 0.0;
-
+        
         for (int i = 0; i < carts.length(); i++) {
 
             JSONObject cart = carts.getJSONObject(i);
@@ -94,12 +95,12 @@ public class Main {
                     }
                 }
 
-                productPrice = quantity*rawProductPrice;
+                productPrice = quantity * rawProductPrice;
                 priceList.add(productPrice);
             }
 
             double summedProductPrice = 0.0;
-            for(Double price : priceList)
+            for (Double price : priceList)
                 summedProductPrice += price;
 
             cartIdCartProductPriceMap.put(cartId, summedProductPrice);
@@ -117,7 +118,7 @@ public class Main {
         for (int i = 0; i < users.length(); i++) {
             JSONObject user = users.getJSONObject(i);
 
-            if(user.getInt("id") == idHighestPrice) {
+            if (user.getInt("id") == idHighestPrice) {
                 System.out.println("Owner is: First Name: " + user.getJSONObject("name").getString("firstname") +
                         ", Last Name: " + user.getJSONObject("name").getString("lastname"));
                 break;
@@ -125,8 +126,62 @@ public class Main {
 
         }
 
+        // Finds the two users living furthest away from each other # 4
+
+        double maxDistance = -1;
+        String userName1Max = null;
+        String userName2Max = null;
+
+        for (int i = 0; i < users.length() - 1; i++) {
+            JSONObject user1 = users.getJSONObject(i);
+
+            String username1 = user1.getString("username");
+            double lat1 = user1.getJSONObject("address").getJSONObject("geolocation").getDouble("lat");
+            double lon1 = user1.getJSONObject("address").getJSONObject("geolocation").getDouble("long");
+
+            for (int j = i + 1; j < users.length(); j++) {
+                JSONObject user2 = users.getJSONObject(j);
+
+                String username2 = user2.getString("username");
+                double lat2 = user2.getJSONObject("address").getJSONObject("geolocation").getDouble("lat");
+                double lon2 = user2.getJSONObject("address").getJSONObject("geolocation").getDouble("long");
+
+                // calculate distance
+                double distance = calculateDistance(lat1, lon1, lat2, lon2);
+
+                if (distance > maxDistance) {
+                    maxDistance = distance;
+                    userName1Max = username1;
+                    userName2Max = username2;
+                }
+
+            }
+        }
+
+        System.out.println();
+
+        System.out.println("User 1: " + userName1Max);
+        System.out.println("User 2: " + userName2Max);
+        System.out.println("Distance: " + maxDistance);
 
 
+    }
+
+    public static double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+
+        lat1 = Math.toRadians(lat1);
+        lon1 = Math.toRadians(lon1);
+        lat2 = Math.toRadians(lat2);
+        lon2 = Math.toRadians(lon2);
+
+        double dLat = lat2 - lat1;
+        double dLon = lon2 - lon1;
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return EARTH_RADIUS * c;
 
     }
 }
