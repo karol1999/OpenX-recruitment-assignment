@@ -25,7 +25,7 @@ class RetrieveDataServiceImplTest {
     void retrieveCartData() {
         // given
         String retrieveData = "Cart: cart 1";
-        when(apiAccessService.retrieveData(URL + "carts")).thenReturn(retrieveData);
+        // when(apiAccessService.retrieveData(URL + "carts")).thenReturn(retrieveData);
 
         // when
         String result = retrieveDataService.retrieveCartData();
