@@ -15,6 +15,7 @@ public class ApiAccessServiceImpl implements ApiAccessService {
     public String retrieveData(String urlString) {
 
         try {
+
             URL url = new URL(urlString);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");

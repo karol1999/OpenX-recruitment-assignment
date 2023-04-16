@@ -19,8 +19,8 @@ public class ProductCategoryServiceImpl implements ProductCategoryService {
         Map<String, Double> productCategoryValueMap;
 
         try {
-            products = new JSONArray(productData);
 
+            products = new JSONArray(productData);
             productCategoryValueMap = new HashMap<>();
 
             for (int i = 0; i < products.length(); i++) {
