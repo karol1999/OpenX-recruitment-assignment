@@ -1,37 +1,44 @@
 package apiaccess.implementation;
 
 import apiaccess.ApiAccessService;
+import exception.DataRetrievalException;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 public class ApiAccessServiceImpl implements ApiAccessService {
 
-    public String retrieveData(String urlString) throws Exception {
+    public String retrieveData(String urlString) {
 
-        URL url = new URL(urlString);
+        try {
+            URL url = new URL(urlString);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
 
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            int responseCode = connection.getResponseCode();
 
-        connection.setRequestMethod("GET");
+            if (responseCode == HttpURLConnection.HTTP_OK) {
 
-        int responseCode = connection.getResponseCode();
+                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String inputLine;
+                StringBuilder content = new StringBuilder();
+                while ((inputLine = in.readLine()) != null) {
+                    content.append(inputLine);
+                }
+                in.close();
 
-        if (responseCode == HttpURLConnection.HTTP_OK) {
-
-            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String inputLine;
-            StringBuilder content = new StringBuilder();
-            while ((inputLine = in.readLine()) != null) {
-                content.append(inputLine);
+                return content.toString();
+            } else {
+                throw new DataRetrievalException("Failed to retrieve data from " + urlString + ". Response Code: " +
+                        responseCode);
             }
-            in.close();
 
-            return content.toString();
-        } else {
-            throw new Exception("Failed to retrieve data from " + urlString + ". Response Code: " + responseCode);
+        } catch (IOException exception) {
+            throw new RuntimeException("Exception was thrown: " + exception.getMessage());
         }
 
     }
