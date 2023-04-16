@@ -1,15 +1,13 @@
-import apiaccess.ApiAccessService;
-import apiaccess.implementation.ApiAccessServiceImpl;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import service.ProductCategoryService;
+import service.RetrieveDataService;
+import service.implementation.ProductCategoryServiceImpl;
+import service.implementation.RetrieveDataServiceImpl;
 
 import java.util.*;
 
 public class Main {
-
-    private static final String USERS_URL = "https://fakestoreapi.com/users";
-    private static final String PRODUCTS_URL = "https://fakestoreapi.com/products";
-    private static final String CARTS_URL = "https://fakestoreapi.com/carts";
 
     private static final double EARTH_RADIUS = 6371.0; // kilometers
 
@@ -17,46 +15,26 @@ public class Main {
 
         // first assignment -> Retrieves user, product and shopping cart data #1
 
-        ApiAccessService apiAccessService = new ApiAccessServiceImpl();
+        RetrieveDataService retrieveDataService = new RetrieveDataServiceImpl();
 
-        String userData = apiAccessService.retrieveData(USERS_URL);
+        String userData = retrieveDataService.retrieveUserData();
         System.out.println("User Data: ");
         System.out.println(userData);
 
-        String cartData = apiAccessService.retrieveData(CARTS_URL);
+        String cartData = retrieveDataService.retrieveCartData();
         System.out.println("Cart Data: ");
         System.out.println(cartData);
 
-        String productData = apiAccessService.retrieveData(PRODUCTS_URL);
+        String productData = retrieveDataService.retrieveProductData();
         System.out.println("Product Data: ");
         System.out.println(productData);
 
         // Creates a data structure containing all available product categories and the total value of #2
         // products of a given category #2
 
-        Map<String, Double> productCategoryValueMap = new HashMap<>();
-        Map<Integer, Double> idPriceMap = new HashMap<>(); // for exercise number 3
+        ProductCategoryService productCategoryService = new ProductCategoryServiceImpl();
 
-        JSONArray products = new JSONArray(productData);
-
-        for (int i = 0; i < products.length(); i++) {
-            JSONObject product = products.getJSONObject(i);
-
-            Integer id = product.getInt("id"); // exercise number 3
-
-            String category = product.getString("category");
-            double price = product.getDouble("price");
-
-            idPriceMap.put(id, price); // exercise number 3
-
-            if (productCategoryValueMap.containsKey(category)) {
-                double totalValue = productCategoryValueMap.get(category) + price;
-                productCategoryValueMap.put(category, totalValue);
-            } else {
-                productCategoryValueMap.put(category, price);
-            }
-
-        }
+        Map<String, Double> productCategoryValueMap = productCategoryService.getCategoryProductMap(productData);
 
         System.out.println("Product Category Data:");
         System.out.println("----------------------");
@@ -73,7 +51,6 @@ public class Main {
 
         JSONArray carts = new JSONArray(cartData);
 
-        
         for (int i = 0; i < carts.length(); i++) {
 
             JSONObject cart = carts.getJSONObject(i);
@@ -88,7 +65,7 @@ public class Main {
                 double rawProductPrice = 0.0;
                 double productPrice;
 
-                for (Map.Entry<Integer, Double> entry : idPriceMap.entrySet()) {
+                for (Map.Entry<Integer, Double> entry : ProductCategoryServiceImpl.idPriceMap.entrySet()) {
                     if (entry.getKey() == productId) {
                         rawProductPrice = entry.getValue();
                         break;
